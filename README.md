@@ -87,13 +87,6 @@ Configure an LLM provider in `.env`, using `LLM_PROVIDER=gemini`, `LLM_PROVIDER=
 
 ```bash
 docker compose up --build
-```
-
-### 4. Access the Application
-
-- Application: http://localhost:8000
-- Human Review Dashboard: http://localhost:8000/review
-- API Documentation: http://localhost:8000/docs
 
 ## Evaluation Metrics
 
