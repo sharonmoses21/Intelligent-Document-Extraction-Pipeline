@@ -27,7 +27,12 @@ def _date_has_evidence(value: str, text: str) -> bool:
 
 
 def _amount_has_evidence(value: Decimal, text: str) -> bool:
-    for candidate in re.findall(r"(?<!\w)\d[\d,]*(?:\.\d{1,2})?", text):
+    labeled_amount = re.compile(
+        r"\b(?:grand\s+total|invoice\s+total|total\s+due|amount\s+due|balance\s+due|total)\b"
+        r"[^\d\n]{0,20}([\d,]+(?:\.\d{1,2})?)",
+        re.IGNORECASE,
+    )
+    for candidate in labeled_amount.findall(text):
         try:
             if Decimal(candidate.replace(",", "")) == value:
                 return True

@@ -48,6 +48,19 @@ def test_validation_flags_unsupported_values_and_total_mismatch():
     assert "Line item amounts do not match the invoice total" in reasons
 
 
+def test_invoice_number_or_date_digits_do_not_support_a_total():
+    text = "Acme Supplies\nInvoice Number: INV-2025\nInvoice Date: 2025-03-14"
+    extracted = InvoiceData(
+        vendor_name="Acme Supplies",
+        invoice_number="INV-2025",
+        invoice_date="2025-03-14",
+        total=Decimal("2025"),
+        confidence=0.9,
+    )
+
+    assert "Extracted total is not supported by OCR text" in review_reasons(extracted, text)
+
+
 def test_pdf_text_is_extracted_without_ocr():
     pdf = pymupdf.open()
     page = pdf.new_page()

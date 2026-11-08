@@ -17,7 +17,7 @@ cp .env.example .env
 docker compose up --build
 ```
 
-Open [http://localhost:8000](http://localhost:8000), [the review dashboard](http://localhost:8000/review), or [API docs](http://localhost:8000/docs). The mock provider requires no API key. To use a real provider, set `LLM_PROVIDER=anthropic` or `LLM_PROVIDER=gemini` and provide its API key in `.env`.
+Open [http://localhost:8000](http://localhost:8000), [the review dashboard](http://localhost:8000/review), or [API docs](http://localhost:8000/docs). Compose binds to loopback for local development; invoice and OCR data are sensitive, so do not expose the unauthenticated API to an untrusted network. Add authentication and HTTPS before deploying it beyond a trusted local environment. The mock provider requires no API key. To use a real provider, set `LLM_PROVIDER=anthropic` or `LLM_PROVIDER=gemini` and provide its API key in `.env`.
 
 ## Run locally
 
