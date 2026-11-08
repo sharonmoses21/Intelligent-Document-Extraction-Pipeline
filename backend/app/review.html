@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Invoice review</title>
+  <style>
+    body { font: 16px system-ui, sans-serif; margin: 2rem auto; max-width: 900px; padding: 0 1rem; }
+    article { border: 1px solid #ccc; border-radius: .5rem; margin: 1rem 0; padding: 1rem; }
+    label { display: block; margin: .5rem 0; }
+    input { max-width: 100%; padding: .35rem; }
+    button { cursor: pointer; padding: .5rem .8rem; }
+    .reason { color: #8a321e; }
+  </style>
+</head>
+<body>
+  <h1>Documents needing review</h1>
+  <p>Correct any fields, then save the review.</p>
+  <main id="documents">Loading…</main>
+  <script>
+    const fields = ["vendor_name", "invoice_number", "invoice_date", "total", "currency"];
+    async function load() {
+      const response = await fetch("/api/review");
+      const documents = await response.json();
+      const main = document.querySelector("#documents");
+      main.replaceChildren();
+      if (!documents.length) main.textContent = "No documents are waiting for review.";
+      for (const record of documents) {
+        const card = document.createElement("article");
+        const heading = document.createElement("h2");
+        heading.textContent = record.filename;
+        card.append(heading);
+        const reasons = document.createElement("p");
+        reasons.className = "reason";
+        reasons.textContent = record.review_reasons.join("; ");
+        card.append(reasons);
+        const source = document.createElement("pre");
+        source.textContent = record.source_text;
+        source.style.whiteSpace = "pre-wrap";
+        card.append(source);
+        const form = document.createElement("form");
+        const inputs = {};
+        for (const field of fields) {
+          const label = document.createElement("label");
+          label.textContent = field.replaceAll("_", " ");
+          const input = document.createElement("input");
+          input.name = field;
+          input.value = record.extracted_data[field] ?? "";
+          label.append(input);
+          form.append(label);
+          inputs[field] = input;
+        }
+        const button = document.createElement("button");
+        button.textContent = "Save review";
+        form.append(button);
+        form.addEventListener("submit", async event => {
+          event.preventDefault();
+          const corrections = Object.fromEntries(fields.map(field => [field, inputs[field].value || null]));
+          const saved = await fetch(`/api/documents/${record.id}/review`, {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({corrections, reviewer: "dashboard"})
+          });
+          if (saved.ok) load();
+          else alert("Could not save this review.");
+        });
+        card.append(form);
+        main.append(card);
+      }
+    }
+    load();
+  </script>
+</body>
+</html>
